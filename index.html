@@ -10,6 +10,7 @@
             background-color: black;
             color: white;
             font-family: 'Poppins', sans-serif;
+            text-align: center;
         }
         .container {
             max-width: 600px;
@@ -28,16 +29,14 @@
             padding: 15px;
             background-color: #333;
             border-radius: 8px;
+            text-align: left;
         }
         label {
             display: block;
             margin-bottom: 10px;
             color: #f8ba17;
         }
-        input[type="date"],
-        input[type="number"],
-        input[type="text"],
-        button {
+        input, button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -57,8 +56,6 @@
         }
         .reset-btn {
             background-color: #4CAF50;
-            color: black;
-            margin-top: 20px;
         }
         .reset-btn:hover {
             background-color: #45a049;
@@ -92,7 +89,7 @@
             <input type="date" id="date1" required>
 
             <label for="mileage1">Mileage on Date 1</label>
-            <input type="number" id="mileage1" required>
+            <input type="number" id="mileage1" min="0" required>
         </div>
 
         <div class="section">
@@ -104,55 +101,54 @@
             <input type="date" id="date2" required>
 
             <label for="mileage2">Mileage on Date 2</label>
-            <input type="number" id="mileage2" required>
+            <input type="number" id="mileage2" min="0" required>
         </div>
 
         <button onclick="calculateMileage()">Calculate Mileage at Purchase Date</button>
         <button class="reset-btn" onclick="resetForm()">Reset</button>
 
         <h2>Calculated Mileage:</h2>
-        <div class="result" id="result">
-            Please enter the data to calculate the mileage.
-        </div>
+        <div class="result" id="result">Please enter the data to calculate the mileage.</div>
     </div>
 
     <script>
+        function formatNumber(num) {
+            return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
         function calculateMileage() {
             const purchaseDate = new Date(document.getElementById("purchaseDate").value);
             const date1 = new Date(document.getElementById("date1").value);
             const mileage1 = parseFloat(document.getElementById("mileage1").value);
             const date2 = new Date(document.getElementById("date2").value);
             const mileage2 = parseFloat(document.getElementById("mileage2").value);
+            const source1 = document.getElementById("source1").value;
             
-            if (isNaN(mileage1) || isNaN(mileage2) || isNaN(purchaseDate)) {
+            if (isNaN(mileage1) || isNaN(mileage2) || isNaN(purchaseDate.getTime())) {
                 document.getElementById("result").innerHTML = "Please enter valid data.";
                 return;
             }
             
-            const daysBetween = (date2 - date1) / (1000 * 60 * 60 * 24);
+            const daysBetween = Math.abs((date2 - date1) / (1000 * 60 * 60 * 24));
             const mileageDifference = mileage2 - mileage1;
             const milesPerDay = mileageDifference / daysBetween;
-            const daysToPurchase = (purchaseDate - date1) / (1000 * 60 * 60 * 24);
-            const estimatedMileage = mileage1 + (milesPerDay * daysToPurchase);
+            const daysToPurchase = Math.abs((purchaseDate - date1) / (1000 * 60 * 60 * 24));
+            const mileageAdjustment = milesPerDay * daysToPurchase;
+            const estimatedMileage = mileage1 - mileageAdjustment;
             
             document.getElementById("result").innerHTML = `
-                The Carfax provided date is ${date1.toLocaleDateString()} and shows mileage of ${mileage1}<br>
-                The current ro date is ${date2.toLocaleDateString()} and shows mileage of ${mileage2}<br>
-                ${daysBetween.toFixed(0)} days and ${mileageDifference} miles<br>
-                This is an average of ${milesPerDay.toFixed(2)} miles per day<br><br>
-                The agreement was purchased ${purchaseDate.toLocaleDateString()} – ${daysToPurchase.toFixed(0)} days from the Carfax supporting date<br>
-                ${daysToPurchase.toFixed(0)} days x ${milesPerDay.toFixed(2)} miles per day = ${(milesPerDay * daysToPurchase).toFixed(2)} miles<br>
-                ${mileage1} – ${(milesPerDay * daysToPurchase).toFixed(2)} miles = ${estimatedMileage.toFixed(2)} miles<br><br>
+                The ${source1} provided date is ${formatDate(date1)} and shows mileage of ${formatNumber(mileage1)}<br><br>
+                The current ro date is ${formatDate(date2)} and shows mileage of ${formatNumber(mileage2)}<br><br>
+                ${daysBetween.toFixed(0)} days and ${formatNumber(mileageDifference)} miles<br><br>
+                This is an average of ${formatNumber(milesPerDay)} miles per day<br><br>
+                The agreement was purchased ${formatDate(purchaseDate)} – ${daysToPurchase.toFixed(0)} days before the ${source1} supporting date<br><br>
+                ${daysToPurchase.toFixed(0)} days x ${formatNumber(milesPerDay)} miles per day = ${formatNumber(mileageAdjustment)} miles<br><br>
+                ${formatNumber(mileage1)} - ${formatNumber(mileageAdjustment)} miles = ${formatNumber(estimatedMileage)} miles<br><br>
                 Please confirm if you agree and we will adjust the starting mileage on this agreement.`;
-        }
-
-        function resetForm() {
-            document.getElementById("purchaseDate").value = "";
-            document.getElementById("date1").value = "";
-            document.getElementById("mileage1").value = "";
-            document.getElementById("date2").value = "";
-            document.getElementById("mileage2").value = "";
-            document.getElementById("result").innerHTML = "Please enter the data to calculate the mileage.";
         }
     </script>
 </body>
