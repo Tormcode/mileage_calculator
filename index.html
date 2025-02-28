@@ -56,12 +56,12 @@
             background-color: #e0a415;
         }
         .reset-btn {
-            background-color: #4CAF50; /* Green color */
+            background-color: #4CAF50;
             color: black;
             margin-top: 20px;
         }
         .reset-btn:hover {
-            background-color: #45a049; /* Darker green */
+            background-color: #45a049;
         }
         .result {
             background-color: #333;
@@ -172,36 +172,25 @@
                 return;
             }
 
-            const purchaseDateObj = new Date(purchaseDate);
-            const date1Obj = new Date(date1);
-            const date2Obj = new Date(date2);
+            const purchaseDateObj = new Date(purchaseDate + "T00:00:00");
+            const date1Obj = new Date(date1 + "T00:00:00");
+            const date2Obj = new Date(date2 + "T00:00:00");
 
             if (date1Obj >= date2Obj) {
                 alert("Date 1 should be earlier than Date 2.");
                 return;
             }
 
-            // Setting the time to midnight for accurate day calculations
-            purchaseDateObj.setHours(0, 0, 0, 0);
-            date1Obj.setHours(0, 0, 0, 0);
-            date2Obj.setHours(0, 0, 0, 0);
-
             const totalDaysBetween = (date2Obj - date1Obj) / (1000 * 3600 * 24);
-            const daysBetweenPurchaseAndDate1 = (purchaseDateObj - date1Obj) / (1000 * 3600 * 24);
+            const daysBeforePurchase = (purchaseDateObj - date1Obj) / (1000 * 3600 * 24);
 
             const mileagePerDay = (mileage2 - mileage1) / totalDaysBetween;
+            const mileageAtPurchase = mileage1 + (mileagePerDay * daysBeforePurchase);
 
-            const mileageAtPurchase = mileage1 + (mileagePerDay * daysBetweenPurchaseAndDate1);
-
-            // Displaying the result with a clear and readable explanation
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `
-                <p>The estimated mileage on the purchase date of <strong>${purchaseDate}</strong> is: <strong>${mileageAtPurchase.toFixed(2)} miles.</strong></p>
-                <p><strong>Explanation:</strong></p>
-                <p><strong>${Math.round(daysBetweenPurchaseAndDate1)} days</strong> and <strong>${(mileage2 - mileage1).toFixed(0)} miles</strong>, an average of <strong>${mileagePerDay.toFixed(2)} miles per day</strong></p>
-                <p><strong>${Math.round(daysBetweenPurchaseAndDate1)} days</strong> from the purchase date to Date 1: <strong>${date1Obj.toLocaleDateString()} to ${date2Obj.toLocaleDateString()}</strong></p>
-                <p><strong>${mileagePerDay.toFixed(2)}</strong> miles/day x <strong>${Math.round(daysBetweenPurchaseAndDate1)}</strong> days = <strong>${(mileagePerDay * daysBetweenPurchaseAndDate1).toFixed(2)} miles</strong></p>
-                <p><strong>${mileage1.toFixed(2)} miles</strong> + <strong>${(mileagePerDay * daysBetweenPurchaseAndDate1).toFixed(2)}</strong> miles = <strong>${mileageAtPurchase.toFixed(2)} miles</strong> on the purchase date.</p>
+            document.getElementById('result').innerHTML = `
+                <p>The agreement was purchased on <strong>${purchaseDate}</strong> – ${daysBeforePurchase.toFixed(0)} days before the supporting date.</p>
+                <p>${daysBeforePurchase.toFixed(0)} days × ${mileagePerDay.toFixed(2)} miles per day = ${ (daysBeforePurchase * mileagePerDay).toFixed(2) } miles</p>
+                <p>${mileage1} miles – ${ (daysBeforePurchase * mileagePerDay).toFixed(2) } miles = <strong>${mileageAtPurchase.toFixed(2)} miles</strong></p>
                 <p><strong>Sources Used:</strong> ${source1}${otherSource1 ? " (Other: " + otherSource1 + ")" : ""} and ${source2}${otherSource2 ? " (Other: " + otherSource2 + ")" : ""}</p>
             `;
         }
@@ -212,10 +201,6 @@
             document.getElementById('mileage1').value = '';
             document.getElementById('date2').value = '';
             document.getElementById('mileage2').value = '';
-            document.getElementById('source1').value = 'Bill of Sale';
-            document.getElementById('source2').value = 'Bill of Sale';
-            document.getElementById('otherSourceText1').value = '';
-            document.getElementById('otherSourceText2').value = '';
             document.getElementById('result').innerHTML = 'Please enter the data to calculate the mileage.';
         }
     </script>
