@@ -21,7 +21,6 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
         }
         h1 {
-            text-align: center;
             color: #f8ba17;
         }
         .section {
@@ -65,8 +64,12 @@
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
-            color: #f8ba17;
+            color: white;
             text-align: left;
+        }
+        .highlight {
+            color: #f8ba17;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -127,28 +130,41 @@
             const date2 = new Date(document.getElementById("date2").value);
             const mileage2 = parseFloat(document.getElementById("mileage2").value);
             const source1 = document.getElementById("source1").value;
-            
+            const source2 = document.getElementById("source2").value;
+
             if (isNaN(mileage1) || isNaN(mileage2) || isNaN(purchaseDate.getTime())) {
                 document.getElementById("result").innerHTML = "Please enter valid data.";
                 return;
             }
-            
+
             const daysBetween = Math.abs((date2 - date1) / (1000 * 60 * 60 * 24));
             const mileageDifference = mileage2 - mileage1;
             const milesPerDay = mileageDifference / daysBetween;
             const daysToPurchase = Math.abs((purchaseDate - date1) / (1000 * 60 * 60 * 24));
             const mileageAdjustment = milesPerDay * daysToPurchase;
             const estimatedMileage = mileage1 - mileageAdjustment;
-            
+
             document.getElementById("result").innerHTML = `
-                The ${source1} provided date is ${formatDate(date1)} and shows mileage of ${formatNumber(mileage1)}<br><br>
-                The current ro date is ${formatDate(date2)} and shows mileage of ${formatNumber(mileage2)}<br><br>
-                ${daysBetween.toFixed(0)} days and ${formatNumber(mileageDifference)} miles<br><br>
-                This is an average of ${formatNumber(milesPerDay)} miles per day<br><br>
-                The agreement was purchased ${formatDate(purchaseDate)} – ${daysToPurchase.toFixed(0)} days before the ${source1} supporting date<br><br>
-                ${daysToPurchase.toFixed(0)} days x ${formatNumber(milesPerDay)} miles per day = ${formatNumber(mileageAdjustment)} miles<br><br>
-                ${formatNumber(mileage1)} - ${formatNumber(mileageAdjustment)} miles = ${formatNumber(estimatedMileage)} miles<br><br>
-                Please confirm if you agree and we will adjust the starting mileage on this agreement.`;
+                <span class="highlight">${source1}</span> recorded mileage of <span class="highlight">${formatNumber(mileage1)}</span> on ${formatDate(date1)}.<br>
+                <span class="highlight">${source2}</span> recorded mileage of <span class="highlight">${formatNumber(mileage2)}</span> on ${formatDate(date2)}.<br><br>
+                Difference: <span class="highlight">${formatNumber(mileageDifference)}</span> miles over ${daysBetween.toFixed(0)} days.<br>
+                Average usage: <span class="highlight">${formatNumber(milesPerDay)}</span> miles/day.<br><br>
+                Purchase date: ${formatDate(purchaseDate)} (<span class="highlight">${daysToPurchase.toFixed(0)}</span> days before ${source1}'s record).<br>
+                Adjustment: ${daysToPurchase.toFixed(0)} days × <span class="highlight">${formatNumber(milesPerDay)}</span> miles/day = <span class="highlight">${formatNumber(mileageAdjustment)}</span> miles.<br><br>
+                Estimated mileage at purchase: <span class="highlight">${formatNumber(estimatedMileage)}</span> miles.<br><br>
+                Please confirm if you agree, and we will adjust the starting mileage on this agreement.
+            `;
+        }
+
+        function resetForm() {
+            document.getElementById("purchaseDate").value = "";
+            document.getElementById("source1").value = "";
+            document.getElementById("date1").value = "";
+            document.getElementById("mileage1").value = "";
+            document.getElementById("source2").value = "";
+            document.getElementById("date2").value = "";
+            document.getElementById("mileage2").value = "";
+            document.getElementById("result").innerHTML = "Please enter the data to calculate the mileage.";
         }
     </script>
 </body>
