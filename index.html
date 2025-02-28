@@ -36,8 +36,8 @@
         }
         input[type="date"],
         input[type="number"],
-        button,
-        select {
+        input[type="text"],
+        button {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -71,10 +71,6 @@
             color: #f8ba17;
             text-align: left;
         }
-        .other-source {
-            margin-top: 10px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -89,21 +85,9 @@
 
         <div class="section">
             <h2>Source 1</h2>
-            <label for="source1">Source Type</label>
-            <select id="source1" onchange="toggleOtherSource('source1', 'otherSource1')">
-                <option value="Bill of Sale">Bill of Sale</option>
-                <option value="Maintenance Record">Maintenance Record</option>
-                <option value="Supporting Document">Supporting Document</option>
-                <option value="Current Claim">Current Claim</option>
-                <option value="Carfax">Carfax</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <div class="other-source" id="otherSource1">
-                <label for="otherSourceText1">Specify Source</label>
-                <input type="text" id="otherSourceText1" placeholder="Specify other source">
-            </div>
-
+            <label for="source1">Source</label>
+            <input type="text" id="source1" required>
+            
             <label for="date1">Date 1</label>
             <input type="date" id="date1" required>
 
@@ -113,21 +97,9 @@
 
         <div class="section">
             <h2>Source 2</h2>
-            <label for="source2">Source Type</label>
-            <select id="source2" onchange="toggleOtherSource('source2', 'otherSource2')">
-                <option value="Bill of Sale">Bill of Sale</option>
-                <option value="Maintenance Record">Maintenance Record</option>
-                <option value="Supporting Document">Supporting Document</option>
-                <option value="Current Claim">Current Claim</option>
-                <option value="Carfax">Carfax</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <div class="other-source" id="otherSource2">
-                <label for="otherSourceText2">Specify Source</label>
-                <input type="text" id="otherSourceText2" placeholder="Specify other source">
-            </div>
-
+            <label for="source2">Source</label>
+            <input type="text" id="source2" required>
+            
             <label for="date2">Date 2</label>
             <input type="date" id="date2" required>
 
@@ -145,63 +117,42 @@
     </div>
 
     <script>
-        function toggleOtherSource(sourceSelectId, otherSourceId) {
-            const sourceSelect = document.getElementById(sourceSelectId);
-            const otherSourceDiv = document.getElementById(otherSourceId);
-            if (sourceSelect.value === 'Other') {
-                otherSourceDiv.style.display = 'block';
-            } else {
-                otherSourceDiv.style.display = 'none';
-            }
-        }
-
         function calculateMileage() {
-            const purchaseDate = document.getElementById('purchaseDate').value;
-            const date1 = document.getElementById('date1').value;
-            const mileage1 = parseFloat(document.getElementById('mileage1').value);
-            const date2 = document.getElementById('date2').value;
-            const mileage2 = parseFloat(document.getElementById('mileage2').value);
-
-            const source1 = document.getElementById('source1').value;
-            const source2 = document.getElementById('source2').value;
-            const otherSource1 = document.getElementById('otherSourceText1').value;
-            const otherSource2 = document.getElementById('otherSourceText2').value;
-
-            if (!purchaseDate || !date1 || !date2 || isNaN(mileage1) || isNaN(mileage2)) {
-                alert("Please fill in all fields with valid values.");
+            const purchaseDate = new Date(document.getElementById("purchaseDate").value);
+            const date1 = new Date(document.getElementById("date1").value);
+            const mileage1 = parseFloat(document.getElementById("mileage1").value);
+            const date2 = new Date(document.getElementById("date2").value);
+            const mileage2 = parseFloat(document.getElementById("mileage2").value);
+            
+            if (isNaN(mileage1) || isNaN(mileage2) || isNaN(purchaseDate)) {
+                document.getElementById("result").innerHTML = "Please enter valid data.";
                 return;
             }
-
-            const purchaseDateObj = new Date(purchaseDate + "T00:00:00");
-            const date1Obj = new Date(date1 + "T00:00:00");
-            const date2Obj = new Date(date2 + "T00:00:00");
-
-            if (date1Obj >= date2Obj) {
-                alert("Date 1 should be earlier than Date 2.");
-                return;
-            }
-
-            const totalDaysBetween = (date2Obj - date1Obj) / (1000 * 3600 * 24);
-            const daysBeforePurchase = (purchaseDateObj - date1Obj) / (1000 * 3600 * 24);
-
-            const mileagePerDay = (mileage2 - mileage1) / totalDaysBetween;
-            const mileageAtPurchase = mileage1 + (mileagePerDay * daysBeforePurchase);
-
-            document.getElementById('result').innerHTML = `
-                <p>The agreement was purchased on <strong>${purchaseDate}</strong> – ${daysBeforePurchase.toFixed(0)} days before the supporting date.</p>
-                <p>${daysBeforePurchase.toFixed(0)} days × ${mileagePerDay.toFixed(2)} miles per day = ${ (daysBeforePurchase * mileagePerDay).toFixed(2) } miles</p>
-                <p>${mileage1} miles – ${ (daysBeforePurchase * mileagePerDay).toFixed(2) } miles = <strong>${mileageAtPurchase.toFixed(2)} miles</strong></p>
-                <p><strong>Sources Used:</strong> ${source1}${otherSource1 ? " (Other: " + otherSource1 + ")" : ""} and ${source2}${otherSource2 ? " (Other: " + otherSource2 + ")" : ""}</p>
-            `;
+            
+            const daysBetween = (date2 - date1) / (1000 * 60 * 60 * 24);
+            const mileageDifference = mileage2 - mileage1;
+            const milesPerDay = mileageDifference / daysBetween;
+            const daysToPurchase = (purchaseDate - date1) / (1000 * 60 * 60 * 24);
+            const estimatedMileage = mileage1 + (milesPerDay * daysToPurchase);
+            
+            document.getElementById("result").innerHTML = `
+                The Carfax provided date is ${date1.toLocaleDateString()} and shows mileage of ${mileage1}<br>
+                The current ro date is ${date2.toLocaleDateString()} and shows mileage of ${mileage2}<br>
+                ${daysBetween.toFixed(0)} days and ${mileageDifference} miles<br>
+                This is an average of ${milesPerDay.toFixed(2)} miles per day<br><br>
+                The agreement was purchased ${purchaseDate.toLocaleDateString()} – ${daysToPurchase.toFixed(0)} days from the Carfax supporting date<br>
+                ${daysToPurchase.toFixed(0)} days x ${milesPerDay.toFixed(2)} miles per day = ${(milesPerDay * daysToPurchase).toFixed(2)} miles<br>
+                ${mileage1} – ${(milesPerDay * daysToPurchase).toFixed(2)} miles = ${estimatedMileage.toFixed(2)} miles<br><br>
+                Please confirm if you agree and we will adjust the starting mileage on this agreement.`;
         }
 
         function resetForm() {
-            document.getElementById('purchaseDate').value = '';
-            document.getElementById('date1').value = '';
-            document.getElementById('mileage1').value = '';
-            document.getElementById('date2').value = '';
-            document.getElementById('mileage2').value = '';
-            document.getElementById('result').innerHTML = 'Please enter the data to calculate the mileage.';
+            document.getElementById("purchaseDate").value = "";
+            document.getElementById("date1").value = "";
+            document.getElementById("mileage1").value = "";
+            document.getElementById("date2").value = "";
+            document.getElementById("mileage2").value = "";
+            document.getElementById("result").innerHTML = "Please enter the data to calculate the mileage.";
         }
     </script>
 </body>
